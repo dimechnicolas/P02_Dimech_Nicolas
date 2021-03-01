@@ -24,3 +24,22 @@ def recup_info_1livre():
         price_including_tax = tds[3].text
         number_available = tds[5].text
         review_rating = soup.find("p", {"class": "star-rating"})["class"]
+        # enregistrement des informations du livre:
+        with open("P02_02_PremierLivre.csv", "a", newline='') as données:
+            données.write(
+                product_page_url + "," + title + "," + str(product_description) + "," + str(image_url) + "," + str(
+                    upc) + "," + str(product_type) + "," + str(price_exclu_tax) + "," + str(
+                    price_including_tax) + "," + str(number_available) + "," + str(review_rating))
+
+
+
+def recup_url_1cathégorie():
+    url = 'http://books.toscrape.com/catalogue/category/books/poetry_23/index.html'
+    res = requests.get(url)
+    soup = BeautifulSoup(res.text, 'lxml')
+
+    # récuperer toute les url
+    if res.ok:
+        liens = soup.findAll("h3")
+        for n in liens:
+            a = n.find("a")
