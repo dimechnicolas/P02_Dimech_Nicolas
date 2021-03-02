@@ -2,6 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
+url = 'http://books.toscrape.com'
+res = requests.get(url)
+soup = BeautifulSoup(res.text, 'lxml')
+
 
 def recup_info_1livre():
     url = 'http://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html'
@@ -32,7 +36,6 @@ def recup_info_1livre():
                     price_including_tax) + "," + str(number_available) + "," + str(review_rating))
 
 
-
 def recup_url_1cathégorie():
     url = 'http://books.toscrape.com/catalogue/category/books/poetry_23/index.html'
     res = requests.get(url)
@@ -41,5 +44,17 @@ def recup_url_1cathégorie():
     # récuperer toute les url
     if res.ok:
         liens = soup.findAll("h3")
+
         for n in liens:
-            a = n.find("a")
+            a = n.find("a")["href"]
+            urls= a.replace("../../../", "http://books.toscrape.com/catalogue/")
+            # boucle:
+                """ récupe url
+                    récup les données
+                    enregistre les données
+                """
+
+
+
+if res.ok:
+    recup_url_1cathégorie()
