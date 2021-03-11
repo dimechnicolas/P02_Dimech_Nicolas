@@ -2,13 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-url = 'http://books.toscrape.com'
-res = requests.get(url)
-soup = BeautifulSoup(res.text, 'lxml')
+url_principale = 'http://books.toscrape.com/' # ok
 
 
-def recup_info_1livre():
-    url = 'http://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html'
+def recup_info_1livre(url):
     res = requests.get(url)
     soup = BeautifulSoup(res.text, 'lxml')
     # mise en page fichié csv:
@@ -29,32 +26,52 @@ def recup_info_1livre():
         number_available = tds[5].text
         review_rating = soup.find("p", {"class": "star-rating"})["class"]
         # enregistrement des informations du livre:
-        with open("P02_02_PremierLivre.csv", "a", newline='') as données:
+        """"with open("P02_02_PremierLivre.csv", "a", newline='') as données:
             données.write(
                 product_page_url + "," + title + "," + str(product_description) + "," + str(image_url) + "," + str(
                     upc) + "," + str(product_type) + "," + str(price_exclu_tax) + "," + str(
                     price_including_tax) + "," + str(number_available) + "," + str(review_rating))
+        """
 
 
-def recup_url_1cathégorie():
-    url = 'http://books.toscrape.com/catalogue/category/books/poetry_23/index.html'
+
+def recup_url_1cathegorie(url):
+    # url = "http://books.toscrape.com/catalogue/category/books/poetry_23/index.html"
     res = requests.get(url)
     soup = BeautifulSoup(res.text, 'lxml')
 
     # récuperer toute les url
     if res.ok:
         liens = soup.findAll("h3")
+        urls = []
+        # récup nb de pages
+
+
 
         for n in liens:
             a = n.find("a")["href"]
-            urls= a.replace("../../../", "http://books.toscrape.com/catalogue/")
-            # boucle:
-                """ récupe url
-                    récup les données
-                    enregistre les données
-                """
+            urls.append(url_principale + a) #.replace("../../../catalogue/", "http://books.toscrape.com/catalogue/" ))
+            print(str(urls))
+        # condition verifiant si il y a plusieurs page
+            # si c'est vrais, boucle qui tourne le nb de page
+                # création beautifulsoupe, en remplacement "index" par le nom de la page
+                # récup h3
+                # boucle pour récup et recomposer les liens (l 53 à 56)
+
+
+        return urls
+
+
+recup_url_1cathegorie(" http://books.toscrape.com/catalogue/category/books/sequential-art_5/")
+# def recup_donnee_1_cathegorie():
+    #for i in range (20):
+        # return recup_info_1livre(url)
 
 
 
-if res.ok:
-    recup_url_1cathégorie()
+
+
+
+
+
+
