@@ -46,7 +46,7 @@ def recup_url_1cathegorie(url):
         li = soup.find("li", {"class": "current"})
         # condition verifiant si il y a plusieurs page
         if li is li != 'none':
-            Li = li.text
+            Li = li#.text
             # print(Li)
             page = url
             # si c'est vrais, boucle qui tourne le nb de page
@@ -57,24 +57,26 @@ def recup_url_1cathegorie(url):
                 # print(soup)
                 # récup h3
                 h3 = soup.findAll("h3")
-                print(h3)
                 # boucle pour récup et recomposer les liens (l 53 à 56)
                 for n in liens:
                     a = n.find("a")["href"]
-                    urls.append(url_principale + a)#.replace("../../../catalogue/", "http://books.toscrape.com/catalogue/" ))
-                    print(str(urls))
-            break
-            # si AttributeError:
-                # return
-    else:
-        print("pas de page")
-        return recup_info_1livre(url)
+                    urls.append(a.replace("../../../", "http://books.toscrape.com/catalogue/" ))
+                    print("plusieur page")
+                break
+        else:
+            prin = "une seule page."
+            print(prin)
+            return recup_info_1livre(url)
+            print()
+
+
+
 
 
         return urls
 
 
-recup_url_1cathegorie("http://books.toscrape.com/catalogue/category/books/historical-fiction_4/index.html")
+recup_url_1cathegorie("http://books.toscrape.com/catalogue/category/books/poetry_23/index.html")
 
 
 
