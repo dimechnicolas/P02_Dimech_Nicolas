@@ -16,7 +16,6 @@ def recup_info_1livre(url):
         infoComplet_un_livre = []
         retour_info_un_livre = {}
         infoComplet_un_livre.append(retour_info_un_livre)
-        print(infoComplet_un_livre)
         product_page_url = url
         retour_info_un_livre["product page url"]= product_page_url
         title = soup.find('h1').text
@@ -41,12 +40,8 @@ def recup_info_1livre(url):
         # print(len(retour_info_un_livre))
 
 
-
-
 def recup_url_1cathegorie(url):
     res = requests.get(url)
-
-
     # récuperer toute les url
     if res.ok:
         soup = BeautifulSoup(res.text, 'lxml')
@@ -88,16 +83,24 @@ def recup_url_1cathegorie(url):
         return urls
 
 
-
-
+def recup_liens_cathegori_menu(url):
+    res = requests.get(url)
+    if res.ok:
+        soup = BeautifulSoup(res.text, 'lxml')
+        liens_nav = []
+        liens = soup.findAll("li")
+        print(liens)
 
 urls = recup_url_1cathegorie("http://books.toscrape.com/catalogue/category/books/mystery_3/index.html")
 for url in urls:
     recup_info_1livre(url)
 
+recup_liens_cathegori_menu(url)
+
+
 
     # enregistrement des informations du livre:
-    """"with open("P02_02_PremierLivre.csv", "a", newline='') as données:
+""""with open("P02_02_PremierLivre.csv", "a", newline='') as données:
         données.write(
             product_page_url + "," + title + "," + str(product_description) + "," + str(image_url) + "," + str(
                 upc) + "," + str(product_type) + "," + str(price_exclu_tax) + "," + str(
@@ -106,9 +109,9 @@ for url in urls:
 
 
 
-"""faire une dico pour le  retour de la récup d'un livre
-stocker en liste toutes les info de tout les livres d'une cathégorie
-faire une fonction qui récu la liste de toute les urls des cathégorie du menu
+"""faire un dico pour le  retour de la récup d'un livre ok
+stocker en liste toutes les info de tout les livres d'une cathégorie => trouver solution pour que chaque livre se trouve dans 1 "positions" (verif nomination)
+faire une fonction qui récup la liste de toute les urls des cathégories du menu 
 """
 
 
