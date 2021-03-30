@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-url_principale = 'http://books.toscrape.com/'
+url_principale = 'http://books.toscrape.com'
 # mise en page fichié csv:
 """with open("P02_02_PremierLivre.csv", "w") as données:
     données.write(
@@ -13,32 +13,30 @@ def recup_info_1livre(url):
     res = requests.get(url)
     if res.ok:
         soup = BeautifulSoup(res.text, 'lxml')
-        infoComplet_un_livre = []
         retour_info_un_livre = {}
-        infoComplet_un_livre.append(retour_info_un_livre)
-        product_page_url = url
-        retour_info_un_livre["product page url"]= product_page_url
-        title = soup.find('h1').text
-        retour_info_un_livre["title"]= title
-        product_description = soup.select("#product_description+p")
-        retour_info_un_livre["product description"] = product_description
-        image_url = soup.select("img")
-        retour_info_un_livre["image url"] = image_url
+        # product_page_url = url
+        retour_info_un_livre["product page url"]= url
+        # title = soup.find('h1').text
+        retour_info_un_livre["title"]= soup.find('h1').text
+        # product_description = soup.select("#product_description+p")
+        retour_info_un_livre["product description"] = soup.select("#product_description+p")
+        # image_url = soup.select("img")
+        retour_info_un_livre["image url"] = soup.select("img")
         tds = soup.findAll("td")
-        upc = tds[0].text
-        retour_info_un_livre["upc"] = upc
-        product_type = tds[1].text
-        retour_info_un_livre["product type"] = product_type
-        price_exclu_tax = tds[2].text
-        retour_info_un_livre["price exclu tax"] = price_exclu_tax
-        price_including_tax = tds[3].text
-        retour_info_un_livre["price including tax"] = price_including_tax
-        number_available = tds[5].text
-        retour_info_un_livre["number available"] = number_available
-        review_rating = soup.find("p", {"class": "star-rating"})["class"]
-        retour_info_un_livre["review rating"] = review_rating
-        # print(len(retour_info_un_livre))
-
+        # upc = tds[0].text
+        retour_info_un_livre["upc"] = tds[0].text
+        # product_type = tds[1].text
+        retour_info_un_livre["product type"] = tds[1].text
+        # price_exclu_tax = tds[2].text
+        retour_info_un_livre["price exclu tax"] = tds[2].text
+        # price_including_tax = tds[3].text
+        retour_info_un_livre["price including tax"] = tds[3].text
+        # number_available = tds[5].text
+        retour_info_un_livre["number available"] = tds[5].text
+        # review_rating = soup.find("p", {"class": "star-rating"})["class"]
+        retour_info_un_livre["review rating"] = soup.find("p", {"class": "star-rating"})["class"]
+        print(retour_info_un_livre)
+        return retour_info_un_livre
 
 def recup_url_1cathegorie(url):
     res = requests.get(url)
@@ -49,16 +47,13 @@ def recup_url_1cathegorie(url):
         urls = []
         # récup nb de pages (balise => <li class="current"
         li = soup.find("li", {"class": "current"})
-
         # condition verifiant si il y a plusieurs page
         if li != None:
             nbre_page = li.text.strip()[-1]
-
-
             # si c'est vrais, boucle qui tourne le nb de page
             for i in range(1, int(nbre_page)+1) :
                 current_url = url.replace("index.html", "page-" + str(i) + ".html")
-                print(current_url)
+                #print(current_url)
                 # création beautifulsoupe, en remplacement "index" par le nom de la page
                 res = requests.get(current_url)
                 soup = BeautifulSoup(res.text, 'lxml')
@@ -69,33 +64,40 @@ def recup_url_1cathegorie(url):
                 for n in h3:
                     a = n.find("a")["href"]
                     urls.append(a.replace("../../../", "http://books.toscrape.com/catalogue/" ))
-
-
-
         else:
-            prin = "une seule page."
-            print(prin)
             for n in liens:
                 a = n.find("a")["href"]
                 urls.append(a.replace("../../../", "http://books.toscrape.com/catalogue/"))
-                print(urls)
+                # print(a)
 
         return urls
 
 
 def recup_liens_cathegori_menu(url):
+    print(url)
     res = requests.get(url)
     if res.ok:
         soup = BeautifulSoup(res.text, 'lxml')
-        liens_nav = []
-        liens = soup.findAll("li")
-        print(liens)
+        # liens_nav = []
+        # récup le menu
+        nav = soup.find("aside").findAll("a")
+        print(nav)
+        # boucle pour récup les liens dans le nav ET recomposer les liens
+            #  a = n.find("a")["href"] ===== récup des liens
+            #  urls.append(a.replace("../../../", "http://books.toscrape.com/catalogue/" )) ===== recompose les liens.
 
-urls = recup_url_1cathegorie("http://books.toscrape.com/catalogue/category/books/mystery_3/index.html")
+
+recup_liens_cathegori_menu(url_principale)
+
+# boucle:
+
+"""urls = recup_url_1cathegorie("http://books.toscrape.com/catalogue/category/books/mystery_3/index.html") === sup liens pour passer a la fonction
+infoComplet_un_livre = []
 for url in urls:
-    recup_info_1livre(url)
+    infoComplet_un_livre.append(recup_info_1livre(url))
+"""
 
-recup_liens_cathegori_menu(url)
+
 
 
 
@@ -109,10 +111,7 @@ recup_liens_cathegori_menu(url)
 
 
 
-"""faire un dico pour le  retour de la récup d'un livre ok
-stocker en liste toutes les info de tout les livres d'une cathégorie => trouver solution pour que chaque livre se trouve dans 1 "positions" (verif nomination)
-faire une fonction qui récup la liste de toute les urls des cathégories du menu 
-"""
+
 
 
 
