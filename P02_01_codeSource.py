@@ -24,7 +24,7 @@ def recup_info_1livre(url):
         retour_info_un_livre["price including tax"] = tds[3].text
         retour_info_un_livre["number available"] = tds[5].text
         retour_info_un_livre["review rating"] = soup.find("p", {"class": "star-rating"})["class"]
-        print(retour_info_un_livre)
+        #print(retour_info_un_livre)
         return retour_info_un_livre
 
 def recup_url_1cathegorie(url):
@@ -57,13 +57,12 @@ def recup_url_1cathegorie(url):
             for n in liens:
                 a = n.find("a")["href"]
                 urls.append(a.replace("../../../", "http://books.toscrape.com/catalogue/"))
-                # print(a)
 
         return urls
 
 
 def recup_liens_cathegori_menu(url):
-    print(url)
+    # print(url)
     res = requests.get(url)
     if res.ok:
         soup = BeautifulSoup(res.text, 'lxml')
@@ -78,34 +77,19 @@ def recup_liens_cathegori_menu(url):
 
 cathegories = recup_liens_cathegori_menu(url_principale)
 for key in cathegories:
-    # print(key,"===>", cathegories[key])
-    print()
-
-# boucle:
-
-
-"""urls = recup_url_1cathegorie("http://books.toscrape.com/catalogue/category/books/mystery_3/index.html") === sup liens pour passer a la fonction
-infoComplet_un_livre = []
-for url in urls:
-    infoComplet_un_livre.append(recup_info_1livre(url))
-"""
-
-
-
-
-
-    # enregistrement des informations du livre:
-""""with open("P02_02_PremierLivre.csv", "a", newline='') as données:
-        données.write(
-            product_page_url + "," + title + "," + str(product_description) + "," + str(image_url) + "," + str(
-                upc) + "," + str(product_type) + "," + str(price_exclu_tax) + "," + str(
-                price_including_tax) + "," + str(number_available) + "," + str(review_rating))
-    """
+    # print(cathegories[key])
+    urls_1_cathe =  recup_url_1cathegorie(cathegories[key])
+    # print(key, '..', urls_1_cathe)
+    with open(key + ".csv", "a", newline='') as données:
+        for url in urls_1_cathe :
+            # print(urls_1_cathe)
+            info_livre = recup_info_1livre(url)
+            données.write(
+                            product_page_url + "," + title + "," + str(product_description) + "," + str(image_url) + "," + str(
+                            upc) + "," + str(product_type) + "," + str(price_exclu_tax) + "," + str(
+                            price_including_tax) + "," + str(number_available) + "," + str(review_rating))  # à redefinir avec nom variable correcte
 
 
 
 
-
-
-
-
+""" modificer fichier ET récuperer les images (et pas l'url)"""
