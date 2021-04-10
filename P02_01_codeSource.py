@@ -3,11 +3,7 @@ from bs4 import BeautifulSoup
 import csv
 
 url_principale = 'http://books.toscrape.com/'
-# mise en page fichié csv:
-"""with open("P02_02_PremierLivre.csv", "w") as données:
-    données.write(
-        "product_page_url, title, product_description, image_ul, upc, product_type, price_exclu_tax,price_inclu_tax, number_available, review_rating " + "\n")
-"""
+
 
 def recup_info_1livre(url):
     res = requests.get(url)
@@ -15,6 +11,7 @@ def recup_info_1livre(url):
         soup = BeautifulSoup(res.text, 'lxml')
         retour_info_un_livre = {}
         retour_info_un_livre["product page url"]= url
+        retour_info_un_livre["title"]= soup.find("h1").text
         retour_info_un_livre["product description"] = soup.select("#product_description+p")
         retour_info_un_livre["image url"] = soup.select("img")
         tds = soup.findAll("td")
@@ -82,14 +79,17 @@ for key in cathegories:
     # print(key, '..', urls_1_cathe)
     with open(key + ".csv", "a", newline='') as données:
         for url in urls_1_cathe :
-            # print(urls_1_cathe)
             info_livre = recup_info_1livre(url)
-            données.write(
-                            product_page_url + "," + title + "," + str(product_description) + "," + str(image_url) + "," + str(
+            données.write (str(info_livre))
+
+"""product_page_url + "," + title + "," + str(product_description) + "," + str(image_url) + "," + str(
                             upc) + "," + str(product_type) + "," + str(price_exclu_tax) + "," + str(
                             price_including_tax) + "," + str(number_available) + "," + str(review_rating))  # à redefinir avec nom variable correcte
 
 
 
 
-""" modificer fichier ET récuperer les images (et pas l'url)"""
+
+
+
+modificer fichier ET récuperer les images (et pas l'url)"""
