@@ -1,28 +1,30 @@
 import requests
 from bs4 import BeautifulSoup
-import csv
+import os
 
 url_principale = 'http://books.toscrape.com/'
-
+os.mkdir("données_scrapées")
 
 def recup_info_1livre(url):
     res = requests.get(url)
     if res.ok:
         soup = BeautifulSoup(res.text, 'lxml')
         retour_info_un_livre = {}
-        retour_info_un_livre["product page url"]= url
-        retour_info_un_livre["title"]= soup.find("h1").text
-        retour_info_un_livre["product description"] = soup.select("#product_description+p")
-        retour_info_un_livre["image url"] = soup.select("img")
+        retour_info_un_livre["product_page_url"] = url
+        retour_info_un_livre["title"] = soup.find("h1").text
+        retour_info_un_livre["product_description"] = soup.select("#product_description+p")
+        retour_info_un_livre["image_url"] = 'http://books.toscrape.com/' + soup.find('img')['src']
         tds = soup.findAll("td")
         retour_info_un_livre["upc"] = tds[0].text
-        retour_info_un_livre["product type"] = tds[1].text
-        retour_info_un_livre["price exclu tax"] = tds[2].text
-        retour_info_un_livre["price including tax"] = tds[3].text
-        retour_info_un_livre["number available"] = tds[5].text
-        retour_info_un_livre["review rating"] = soup.find("p", {"class": "star-rating"})["class"]
-        #print(retour_info_un_livre)
-        return retour_info_un_livre
+        retour_info_un_livre["product_type"] = tds[1].text
+        retour_info_un_livre["price_exclu_tax"] = tds[2].text
+        retour_info_un_livre["price_including_tax"] = tds[3].text
+        retour_info_un_livre["number_available"] = tds[5].text
+        retour_info_un_livre["review_rating"] = soup.find("p", {"class": "star-rating"})["class"]
+        # retour_info_un_livre["image"] = urllib.request.urlretrieve(image_url)
+        return retour_info_un_livre # retour dans fichier csv
+
+
 
 def recup_url_1cathegorie(url):
     res = requests.get(url)
@@ -39,14 +41,13 @@ def recup_url_1cathegorie(url):
             # si c'est vrais, boucle qui tourne le nb de page
             for i in range(1, int(nbre_page)+1) :
                 current_url = url.replace("index.html", "page-" + str(i) + ".html")
-                #print(current_url)
                 # création beautifulsoupe, en remplacement "index" par le nom de la page
                 res = requests.get(current_url)
                 soup = BeautifulSoup(res.text, 'lxml')
                 # print(soup)
                 # récup h3
                 h3 = soup.findAll("h3")
-                # boucle pour récup et recomposer les liens (l 53 à 56)
+                # boucle pour récup et recomposer les liens
                 for n in h3:
                     a = n.find("a")["href"]
                     urls.append(a.replace("../../../", "http://books.toscrape.com/catalogue/" ))
@@ -59,7 +60,6 @@ def recup_url_1cathegorie(url):
 
 
 def recup_liens_cathegori_menu(url):
-    # print(url)
     res = requests.get(url)
     if res.ok:
         soup = BeautifulSoup(res.text, 'lxml')
@@ -74,22 +74,13 @@ def recup_liens_cathegori_menu(url):
 
 cathegories = recup_liens_cathegori_menu(url_principale)
 for key in cathegories:
-    # print(cathegories[key])
-    urls_1_cathe =  recup_url_1cathegorie(cathegories[key])
-    # print(key, '..', urls_1_cathe)
-    with open(key + ".csv", "a", newline='') as données:
-        for url in urls_1_cathe :
-            info_livre = recup_info_1livre(url)
-            données.write (str(info_livre))
+    urls_1_cathe = recup_url_1cathegorie(cathegories[key])
+    # print(urls_1_cathe)
+    with open("données_scrapées/" + key + ".csv", "a", newline='') as données:
+        données.write("product_page_url , title , product_description , image_url , upc  , product_type , price_exclu_tax  ,  price_including_tax  ,  number_available , review_rating" )
+        for url in urls_1_cathe:
+            info_livre = recup_info_1livre(url) # product_page_url + title + product_description + image_url + upc + product_type + price_exclu_tax + price_including_tax + number_available + review_rating
+            données.write(str(info_livre["product_page_url"]) + ',' + str(info_livre["title"]) + ',' + str(info_livre["product_description"]) + ',' + str(info_livre["image_url"]) + ',' + str(info_livre["upc"]) + ',' + str(info_livre["product_type"]) + ',' + str(info_livre["price_exclu_tax"]) + ',' + str(info_livre["price_including_tax"]) + ',' + str(info_livre["number_available"]) + ',' + str(info_livre["review_rating"]) + '\n')
+            données.write(str(info_livre))
 
-"""product_page_url + "," + title + "," + str(product_description) + "," + str(image_url) + "," + str(
-                            upc) + "," + str(product_type) + "," + str(price_exclu_tax) + "," + str(
-                            price_including_tax) + "," + str(number_available) + "," + str(review_rating))  # à redefinir avec nom variable correcte
-
-
-
-
-
-
-
-modificer fichier ET récuperer les images (et pas l'url)"""
+"""modificer fichier ET récuperer les images (et pas l'url)"""
