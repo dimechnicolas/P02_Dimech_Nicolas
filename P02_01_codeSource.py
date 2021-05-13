@@ -1,32 +1,40 @@
+import re
+
 import requests
 from bs4 import BeautifulSoup
 import os
 
 url_principale = 'http://books.toscrape.com/'
-os.mkdir("données_scrapées")
+os.mkdir("donnees_scrapees")
+os.mkdir("images")
 
-def recup_info_1livre(url):
+def recup_livre(url): # récupération des données pour 1 livre
     res = requests.get(url)
     if res.ok:
         soup = BeautifulSoup(res.text, 'lxml')
-        retour_info_un_livre = {}
-        retour_info_un_livre["product_page_url"] = url
-        retour_info_un_livre["title"] = soup.find("h1").text
-        retour_info_un_livre["product_description"] = soup.select("#product_description+p")
-        retour_info_un_livre["image_url"] = 'http://books.toscrape.com/' + soup.find('img')['src']
+        info_livre = {}
+        info_livre["product_page_url"] = url
+        info_livre["title"] = soup.find("h1").text
+        info_livre["product_description"] = soup.select("#product_description+p")
+        info_livre["image_url"] = 'http://books.toscrape.com/' + soup.find('img')['src']
         tds = soup.findAll("td")
-        retour_info_un_livre["upc"] = tds[0].text
-        retour_info_un_livre["product_type"] = tds[1].text
-        retour_info_un_livre["price_exclu_tax"] = tds[2].text
-        retour_info_un_livre["price_including_tax"] = tds[3].text
-        retour_info_un_livre["number_available"] = tds[5].text
-        retour_info_un_livre["review_rating"] = soup.find("p", {"class": "star-rating"})["class"]
-        # retour_info_un_livre["image"] = urllib.request.urlretrieve(image_url)
-        return retour_info_un_livre # retour dans fichier csv
+        info_livre["upc"] = tds[0].text
+        info_livre["product_type"] = tds[1].text
+        info_livre["price_exclu_tax"] = tds[2].text
+        info_livre["price_including_tax"] = tds[3].text
+        info_livre["number_available"] = tds[5].text
+        info_livre["review_rating"] = soup.find("p", {"class": "star-rating"})["class"]
+        res_img = requests.get(info_livre["image_url"])
+        print(info_livre["image_url"])
+        if res_img.ok:
+            title = re.sub("\W+", "_", info_livre["title"].strip().replace(" ", "_"))
+            with open("images/" + title + ".jpg" , "wb") as image:
+                image.write(res_img.content)
+        return info_livre # retour dans fichier csv
 
 
 
-def recup_url_1cathegorie(url):
+def recup_url_cathegorie(url):
     res = requests.get(url)
     # récuperer toute les url
     if res.ok:
@@ -74,13 +82,13 @@ def recup_liens_cathegori_menu(url):
 
 cathegories = recup_liens_cathegori_menu(url_principale)
 for key in cathegories:
-    urls_1_cathe = recup_url_1cathegorie(cathegories[key])
+    urls_cathe = recup_url_cathegorie(cathegories[key])
     # print(urls_1_cathe)
-    with open("données_scrapées/" + key + ".csv", "a", newline='') as données:
-        données.write("product_page_url , title , product_description , image_url , upc  , product_type , price_exclu_tax  ,  price_including_tax  ,  number_available , review_rating" )
-        for url in urls_1_cathe:
-            info_livre = recup_info_1livre(url) # product_page_url + title + product_description + image_url + upc + product_type + price_exclu_tax + price_including_tax + number_available + review_rating
-            données.write(str(info_livre["product_page_url"]) + ',' + str(info_livre["title"]) + ',' + str(info_livre["product_description"]) + ',' + str(info_livre["image_url"]) + ',' + str(info_livre["upc"]) + ',' + str(info_livre["product_type"]) + ',' + str(info_livre["price_exclu_tax"]) + ',' + str(info_livre["price_including_tax"]) + ',' + str(info_livre["number_available"]) + ',' + str(info_livre["review_rating"]) + '\n')
-            données.write(str(info_livre))
+    with open("donnees_scrapees/" + key + ".csv", "a", newline='') as donnees:
+        donnees.write("product_page_url , title , product_description , image_url , upc  , product_type , price_exclu_tax  ,  price_including_tax  ,  number_available , review_rating" )
+        for url in urls_cathe:
+            info_livre = recup_livre(url) # product_page_url + title + product_description + image_url + upc + product_type + price_exclu_tax + price_including_tax + number_available + review_rating
+            donnees.write(str(info_livre["product_page_url"]) + ',' + str(info_livre["title"]) + ',' + str(info_livre["product_description"]) + ',' + str(info_livre["image_url"]) + ',' + str(info_livre["upc"]) + ',' + str(info_livre["product_type"]) + ',' + str(info_livre["price_exclu_tax"]) + ',' + str(info_livre["price_including_tax"]) + ',' + str(info_livre["number_available"]) + ',' + str(info_livre["review_rating"]) + '\n')
+            donnees.write(str(info_livre))
 
 """modificer fichier ET récuperer les images (et pas l'url)"""
